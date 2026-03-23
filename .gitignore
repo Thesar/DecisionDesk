@@ -1,0 +1,29 @@
+# Build folders
+bin/
+obj/
+dist/
+build/
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+
+# Environment files
+.env
+.env.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+
+# Node modules (vetëm nëse ke node për ndonjë frontend)
+node_modules/
+
+# Temporary files
+tmp/
+temp/
