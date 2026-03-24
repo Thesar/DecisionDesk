@@ -1,19 +1,36 @@
 using System.IO;
+using Models;
 
 namespace Data;
 
-public class FileRepository<T> : IRepository<T>
+public class FileRepository : IRepository<Decision>
 {
-    private List<T> data = new List<T>();
+    private List<Decision> data = new List<Decision>();
+    private string filePath = "data.csv";
 
-    public List<T> GetAll() => data;
+    public List<Decision> GetAll()
+    {
+        return data;
+    }
 
-    public T GetById(int id) => data[id];
+    public Decision GetById(int id)
+    {
+        return data.FirstOrDefault(d => d.GetId() == id)!;
+    }
 
-    public void Add(T entity) => data.Add(entity);
+    public void Add(Decision entity)
+    {
+        data.Add(entity);
+    }
 
     public void Save()
     {
-        File.WriteAllText("data.csv", "saved");
+        using (StreamWriter writer = new StreamWriter(filePath))
+        {
+            foreach (var d in data)
+            {
+                writer.WriteLine($"{d.GetId()},{d.GetDecisionType()},{d.GetValue()}");
+            }
+        }
     }
 }
