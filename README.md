@@ -90,15 +90,25 @@ Qëllimi i DecisionDesk është të demonstrojë se si **analiza e të dhënave 
 
 ---
 
-## 🛠 Teknologjitë e Planifikuara
+## 🛠 Teknologjitë e Përdorura
 
-- JavaScript
-- Node.js
-- HTML / CSS
+- C# (.NET Console Application)
+- File Handling (CSV)
 - Git & GitHub
+
 
 ---
 
 ## 📌 Statusi i Projektit
 
 🚧 Currently in development
+
+## ✅ Current Implementation
+
+Ky version i aplikacionit implementon:
+
+- CRUD operacione (Create, Read, Update, Delete)
+- Ruajtje të të dhënave në CSV
+- Arkitekturë me shtresa (Models, Services, Data, UI)
+- Repository Pattern
+- Validim të inputeve
