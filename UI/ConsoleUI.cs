@@ -1,93 +1,176 @@
 using Services;
-using Data;
 
 namespace UI;
 
 public class ConsoleUI
 {
-    private DecisionService service;
+    private readonly DecisionService service;
 
-    public ConsoleUI()
+    public ConsoleUI(DecisionService service)
     {
-        service = new DecisionService(new FileRepository());
+        this.service = service;
     }
 
     public void ShowMenu()
     {
         while (true)
         {
-            Console.WriteLine("\nDecisionDesk");
+            Console.WriteLine("\n=== DecisionDesk ===");
             Console.WriteLine("1. List Decisions");
             Console.WriteLine("2. Add Decision");
             Console.WriteLine("3. Find by ID");
             Console.WriteLine("4. Update Decision");
             Console.WriteLine("5. Delete Decision");
+            Console.WriteLine("6. Filter by Type");
             Console.WriteLine("0. Exit");
+            Console.Write("Zgjedhja juaj: ");
 
-            var choice = Console.ReadLine();
+            string choice = Console.ReadLine() ?? "";
 
-            if (choice == "1")
+            switch (choice)
             {
-                var list = service.ListAll();
-                foreach (var d in list)
-                {
-                    Console.WriteLine($"{d.GetId()} - {d.GetName()} - {d.GetValue()}");
-                }
+                case "1":
+                    ListDecisions();
+                    break;
+                case "2":
+                    AddDecision();
+                    break;
+                case "3":
+                    FindDecisionById();
+                    break;
+                case "4":
+                    UpdateDecision();
+                    break;
+                case "5":
+                    DeleteDecision();
+                    break;
+                case "6":
+                    FilterByType();
+                    break;
+                case "0":
+                    Console.WriteLine("Programi u mbyll.");
+                    return;
+                default:
+                    Console.WriteLine("Zgjedhje e pavlefshme.");
+                    break;
             }
-            else if (choice == "2")
+        }
+    }
+
+    private void ListDecisions()
+    {
+        var list = service.ListAll();
+
+        if (!list.Any())
+        {
+            Console.WriteLine("Nuk ka vendime të ruajtura.");
+            return;
+        }
+
+        foreach (var decision in list)
+        {
+            Console.WriteLine(decision);
+        }
+    }
+
+    private void AddDecision()
+    {
+        Console.Write("Name: ");
+        string name = Console.ReadLine() ?? "";
+
+        Console.Write("Type: ");
+        string type = Console.ReadLine() ?? "";
+
+        double value = ReadDouble("Value: ");
+        double risk = ReadDouble("Risk: ");
+
+        bool result = service.Add(name, type, value, risk, out string message);
+        Console.WriteLine(message);
+    }
+
+    private void FindDecisionById()
+    {
+        int id = ReadInt("ID: ");
+        var decision = service.GetById(id);
+
+        if (decision == null)
+        {
+            Console.WriteLine("Itemi nuk u gjet.");
+            return;
+        }
+
+        Console.WriteLine(decision);
+    }
+
+    private void UpdateDecision()
+    {
+        int id = ReadInt("ID: ");
+
+        Console.Write("New Name: ");
+        string name = Console.ReadLine() ?? "";
+
+        double value = ReadDouble("New Value: ");
+
+        bool result = service.Update(id, name, value, out string message);
+        Console.WriteLine(message);
+    }
+
+    private void DeleteDecision()
+    {
+        int id = ReadInt("ID: ");
+
+        bool result = service.Delete(id, out string message);
+        Console.WriteLine(message);
+    }
+
+    private void FilterByType()
+    {
+        Console.Write("Shkruaj tipin për filtrim: ");
+        string filter = Console.ReadLine() ?? "";
+
+        var list = service.ListAll(filter);
+
+        if (!list.Any())
+        {
+            Console.WriteLine("Nuk u gjet asnjë rezultat.");
+            return;
+        }
+
+        foreach (var decision in list)
+        {
+            Console.WriteLine(decision);
+        }
+    }
+
+    private int ReadInt(string message)
+    {
+        while (true)
+        {
+            Console.Write(message);
+            string input = Console.ReadLine() ?? "";
+
+            if (int.TryParse(input, out int result))
             {
-                Console.Write("Name: ");
-                string name = Console.ReadLine() ?? "";
-
-                Console.Write("Type: ");
-                string type = Console.ReadLine() ?? "";
-
-                Console.Write("Value: ");
-                double value = double.Parse(Console.ReadLine() ?? "0");
-
-                Console.Write("Risk: ");
-                double risk = double.Parse(Console.ReadLine() ?? "0");
-
-                service.Add(name, type, value, risk);
+                return result;
             }
-            else if (choice == "3")
+
+            Console.WriteLine("Ju lutem shkruani numër valid.");
+        }
+    }
+
+    private double ReadDouble(string message)
+    {
+        while (true)
+        {
+            Console.Write(message);
+            string input = Console.ReadLine() ?? "";
+
+            if (double.TryParse(input, out double result))
             {
-                Console.Write("ID: ");
-                int id = int.Parse(Console.ReadLine() ?? "0");
-
-                var d = service.GetById(id);
-
-                if (d != null)
-                    Console.WriteLine($"{d.GetName()} - {d.GetValue()}");
-                else
-                    Console.WriteLine("Not found");
+                return result;
             }
-            else if (choice == "4")
-            {
-                Console.Write("ID: ");
-                int id = int.Parse(Console.ReadLine() ?? "0");
 
-                Console.Write("New Name: ");
-                string name = Console.ReadLine() ?? "";
-
-                Console.Write("New Value: ");
-                double value = double.Parse(Console.ReadLine() ?? "0");
-
-                service.Update(id, name, value);
-                Console.WriteLine("Updated!");
-            }
-            else if (choice == "5")
-            {
-                Console.Write("ID: ");
-                int id = int.Parse(Console.ReadLine() ?? "0");
-
-                service.Delete(id);
-                Console.WriteLine("Deleted!");
-            }
-            else if (choice == "0")
-            {
-                break;
-            }
+            Console.WriteLine("Ju lutem shkruani numër valid.");
         }
     }
 }

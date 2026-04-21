@@ -22,4 +22,9 @@ public class Decision
     public string GetTypeName() => type;
     public double GetValue() => value;
     public double GetRisk() => risk;
+
+    public override string ToString()
+    {
+        return $"{id} - {name} - {type} - Value: {value} - Risk: {risk}";
+    }
 }

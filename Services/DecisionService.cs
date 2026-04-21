@@ -1,42 +1,65 @@
-using Models;
 using Data;
+using Models;
 
 namespace Services;
 
 public class DecisionService
 {
-    private IRepository<Decision> repo;
+    private readonly IRepository<Decision> repo;
 
     public DecisionService(IRepository<Decision> repo)
     {
         this.repo = repo;
     }
 
-    public List<Decision> ListAll(string typeFilter = "")
+    public List<Decision> ListAll(string? typeFilter = null)
     {
         var list = repo.GetAll();
 
-        if (!string.IsNullOrEmpty(typeFilter))
+        if (!string.IsNullOrWhiteSpace(typeFilter))
         {
-            list = list.Where(d => d.GetTypeName() == typeFilter).ToList();
+            list = list
+                .Where(d => d.GetTypeName().Contains(typeFilter, StringComparison.OrdinalIgnoreCase))
+                .ToList();
         }
 
         return list;
     }
 
-    public void Add(string name, string type, double value, double risk)
+    public bool Add(string name, string type, double value, double risk, out string message)
     {
         if (string.IsNullOrWhiteSpace(name))
-            throw new Exception("Name cannot be empty");
+        {
+            message = "Emri nuk mund të jetë bosh.";
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(type))
+        {
+            message = "Tipi nuk mund të jetë bosh.";
+            return false;
+        }
 
         if (value <= 0)
-            throw new Exception("Value must be > 0");
+        {
+            message = "Vlera duhet të jetë më e madhe se 0.";
+            return false;
+        }
+
+        if (risk < 0)
+        {
+            message = "Risku nuk mund të jetë negativ.";
+            return false;
+        }
 
         var list = repo.GetAll();
-        int newId = list.Count + 1;
+        int newId = list.Any() ? list.Max(d => d.GetId()) + 1 : 1;
 
         var decision = new Decision(newId, name, type, value, risk);
-        repo.Add(decision);
+        bool result = repo.Add(decision);
+
+        message = result ? "Vendimi u shtua me sukses." : "Vendimi nuk u ruajt.";
+        return result;
     }
 
     public Decision? GetById(int id)
@@ -44,31 +67,53 @@ public class DecisionService
         return repo.GetById(id);
     }
 
-    public void Update(int id, string name, double value)
+    public bool Update(int id, string name, double value, out string message)
     {
         var existing = repo.GetById(id);
 
         if (existing == null)
-            throw new Exception("Not found");
+        {
+            message = "Itemi nuk u gjet.";
+            return false;
+        }
 
         if (string.IsNullOrWhiteSpace(name))
-            throw new Exception("Name cannot be empty");
+        {
+            message = "Emri nuk mund të jetë bosh.";
+            return false;
+        }
 
         if (value <= 0)
-            throw new Exception("Value must be > 0");
+        {
+            message = "Vlera duhet të jetë më e madhe se 0.";
+            return false;
+        }
 
-        var updated = new Decision(id, name, existing.GetTypeName(), value, existing.GetRisk());
+        var updated = new Decision(
+            id,
+            name,
+            existing.GetTypeName(),
+            value,
+            existing.GetRisk()
+        );
 
-        repo.Update(updated);
+        bool result = repo.Update(updated);
+        message = result ? "Vendimi u përditësua me sukses." : "Përditësimi dështoi.";
+        return result;
     }
 
-    public void Delete(int id)
+    public bool Delete(int id, out string message)
     {
         var existing = repo.GetById(id);
 
         if (existing == null)
-            throw new Exception("Not found");
+        {
+            message = "Itemi nuk u gjet.";
+            return false;
+        }
 
-        repo.Delete(id);
+        bool result = repo.Delete(id);
+        message = result ? "Vendimi u fshi me sukses." : "Fshirja dështoi.";
+        return result;
     }
 }

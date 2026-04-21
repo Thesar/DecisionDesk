@@ -1,4 +1,9 @@
-﻿using UI;
+﻿using Data;
+using Services;
+using UI;
 
-var ui = new ConsoleUI();
+var repository = new FileRepository("Data/data.csv");
+var service = new DecisionService(repository);
+var ui = new ConsoleUI(service);
+
 ui.ShowMenu();
