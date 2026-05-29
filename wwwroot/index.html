@@ -7,6 +7,64 @@
     <link rel="stylesheet" href="/styles.css">
   </head>
   <body>
+    <section class="auth-screen" id="authScreen">
+      <div class="auth-brand">
+        <span class="brand-mark">✓</span>
+        <span>DecisionDesk</span>
+      </div>
+
+      <div class="auth-card">
+        <div class="auth-copy">
+          <h1 id="authTitle">Log in</h1>
+          <p id="authSubtitle">Hyr në dashboard për të menaxhuar vendimet e biznesit.</p>
+        </div>
+
+        <form id="authForm" class="auth-form">
+          <label class="field register-only">
+            <span>Full Name</span>
+            <input id="authName" type="text" placeholder="Julia Smith">
+          </label>
+
+          <label class="field">
+            <span>Email</span>
+            <input id="authEmail" type="email" placeholder="you@example.com" required>
+          </label>
+
+          <label class="field">
+            <span>Password</span>
+            <input id="authPassword" type="password" placeholder="Minimum 6 characters" required>
+          </label>
+
+          <label class="field register-only">
+            <span>Confirm Password</span>
+            <input id="authConfirmPassword" type="password" placeholder="Repeat password">
+          </label>
+
+          <label class="field register-only">
+            <span>Role</span>
+            <select id="authRole">
+              <option>Business Owner</option>
+              <option>Admin</option>
+              <option>Analyst</option>
+            </select>
+          </label>
+
+          <button class="primary-button" id="authSubmitButton" type="submit">Log In</button>
+          <p class="form-message" id="authMessage" role="status"></p>
+        </form>
+
+        <div class="auth-switch">
+          <span id="authSwitchText">Nuk ke account?</span>
+          <button class="text-button" id="authSwitchButton" type="button">Register</button>
+        </div>
+
+        <div class="demo-login">
+          <span>Demo account</span>
+          <button class="ghost-button" id="demoLoginButton" type="button">Use Demo User</button>
+        </div>
+      </div>
+    </section>
+
     <div class="app-shell">
       <aside class="sidebar">
         <a class="brand" href="/" aria-label="DecisionDesk home">
@@ -59,6 +117,14 @@
             <button class="icon-button" id="notificationButton" type="button" title="Show high risk decisions">!</button>
             <button class="icon-button" id="helpButton" type="button" title="Show demo help">?</button>
             <div class="status-pill" id="statusPill">Demo Ready</div>
+            <button class="user-menu" id="profileButton" type="button" title="Show profile">
+              <span class="avatar" id="currentUserAvatar">JS</span>
+              <span>
+                <strong id="currentUserName">Julia Smith</strong>
+                <small id="currentUserRole">Business Owner</small>
+              </span>
+            </button>
+            <button class="ghost-button logout-button" id="logoutButton" type="button">Logout</button>
           </div>
         </header>
 

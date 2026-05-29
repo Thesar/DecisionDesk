@@ -1,4 +1,6 @@
 const STORAGE_KEY = "decisiondesk-decisions";
+const USERS_KEY = "decisiondesk-users";
+const SESSION_KEY = "decisiondesk-session";
 
 const seedDecisions = [
   { id: 1, name: "Price Change", type: "price", value: 10, risk: 0.2 },
@@ -84,6 +86,8 @@ const state = {
   editingId: null,
   usesApi: true,
   activeView: "dashboard",
+  authMode: "login",
+  currentUser: null,
 };
 
 const elements = {
@@ -120,7 +124,195 @@ const elements = {
   insightText: document.querySelector("#insightText"),
   notificationButton: document.querySelector("#notificationButton"),
   helpButton: document.querySelector("#helpButton"),
+  authScreen: document.querySelector("#authScreen"),
+  authForm: document.querySelector("#authForm"),
+  authTitle: document.querySelector("#authTitle"),
+  authSubtitle: document.querySelector("#authSubtitle"),
+  authName: document.querySelector("#authName"),
+  authEmail: document.querySelector("#authEmail"),
+  authPassword: document.querySelector("#authPassword"),
+  authConfirmPassword: document.querySelector("#authConfirmPassword"),
+  authRole: document.querySelector("#authRole"),
+  authSubmitButton: document.querySelector("#authSubmitButton"),
+  authMessage: document.querySelector("#authMessage"),
+  authSwitchText: document.querySelector("#authSwitchText"),
+  authSwitchButton: document.querySelector("#authSwitchButton"),
+  demoLoginButton: document.querySelector("#demoLoginButton"),
+  profileButton: document.querySelector("#profileButton"),
+  logoutButton: document.querySelector("#logoutButton"),
+  currentUserAvatar: document.querySelector("#currentUserAvatar"),
+  currentUserName: document.querySelector("#currentUserName"),
+  currentUserRole: document.querySelector("#currentUserRole"),
 };
+
+function initializeAuth() {
+  ensureDemoUser();
+  const sessionEmail = localStorage.getItem(SESSION_KEY);
+  const users = loadUsers();
+  const user = users.find((item) => item.email === sessionEmail);
+
+  if (user) {
+    state.currentUser = user;
+    showApp();
+  } else {
+    showAuth("login");
+  }
+}
+
+function ensureDemoUser() {
+  const users = loadUsers();
+  const hasDemo = users.some((user) => user.email === "demo@decisiondesk.com");
+
+  if (!hasDemo) {
+    users.push({
+      name: "Julia Smith",
+      email: "demo@decisiondesk.com",
+      password: "demo123",
+      role: "Business Owner",
+    });
+    saveUsers(users);
+  }
+}
+
+function loadUsers() {
+  const saved = localStorage.getItem(USERS_KEY);
+
+  if (!saved) {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(saved);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveUsers(users) {
+  localStorage.setItem(USERS_KEY, JSON.stringify(users));
+}
+
+function showAuth(mode) {
+  state.authMode = mode;
+  elements.authScreen.dataset.mode = mode;
+  elements.authScreen.classList.remove("hidden");
+  document.body.classList.add("auth-active");
+  elements.authForm.reset();
+  elements.authMessage.textContent = "";
+  elements.authMessage.className = "form-message";
+
+  const isRegister = mode === "register";
+  elements.authTitle.textContent = isRegister ? "Register" : "Log in";
+  elements.authSubtitle.textContent = isRegister
+    ? "Krijo account për të ruajtur sesionin dhe për të përdorur dashboard-in."
+    : "Hyr në dashboard për të menaxhuar vendimet e biznesit.";
+  elements.authSubmitButton.textContent = isRegister ? "Create Account" : "Log In";
+  elements.authSwitchText.textContent = isRegister ? "Ke account?" : "Nuk ke account?";
+  elements.authSwitchButton.textContent = isRegister ? "Log in" : "Register";
+}
+
+function showApp() {
+  elements.authScreen.classList.add("hidden");
+  document.body.classList.remove("auth-active");
+  updateUserProfile();
+  loadDecisions();
+}
+
+function updateUserProfile() {
+  const user = state.currentUser;
+
+  if (!user) {
+    return;
+  }
+
+  elements.currentUserName.textContent = user.name;
+  elements.currentUserRole.textContent = user.role;
+  elements.currentUserAvatar.textContent = initials(user.name);
+}
+
+function handleAuthSubmit(event) {
+  event.preventDefault();
+
+  if (state.authMode === "register") {
+    registerUser();
+  } else {
+    loginUser();
+  }
+}
+
+function registerUser() {
+  const name = elements.authName.value.trim();
+  const email = elements.authEmail.value.trim().toLowerCase();
+  const password = elements.authPassword.value;
+  const confirmPassword = elements.authConfirmPassword.value;
+  const role = elements.authRole.value;
+  const users = loadUsers();
+
+  if (!name) {
+    showAuthMessage("Emri është i detyrueshëm.", "error");
+    return;
+  }
+
+  if (!isValidEmail(email)) {
+    showAuthMessage("Shkruaj email valid.", "error");
+    return;
+  }
+
+  if (password.length < 6) {
+    showAuthMessage("Password duhet të ketë të paktën 6 karaktere.", "error");
+    return;
+  }
+
+  if (password !== confirmPassword) {
+    showAuthMessage("Password-at nuk përputhen.", "error");
+    return;
+  }
+
+  if (users.some((user) => user.email === email)) {
+    showAuthMessage("Ky email është regjistruar më parë.", "error");
+    return;
+  }
+
+  const user = { name, email, password, role };
+  users.push(user);
+  saveUsers(users);
+  setSession(user);
+}
+
+function loginUser() {
+  const email = elements.authEmail.value.trim().toLowerCase();
+  const password = elements.authPassword.value;
+  const user = loadUsers().find((item) => item.email === email && item.password === password);
+
+  if (!user) {
+    showAuthMessage("Email ose password i gabuar.", "error");
+    return;
+  }
+
+  setSession(user);
+}
+
+function setSession(user) {
+  state.currentUser = user;
+  localStorage.setItem(SESSION_KEY, user.email);
+  showApp();
+}
+
+function logoutUser() {
+  localStorage.removeItem(SESSION_KEY);
+  state.currentUser = null;
+  showAuth("login");
+}
+
+function showAuthMessage(message, type) {
+  elements.authMessage.textContent = message;
+  elements.authMessage.className = `form-message ${type}`;
+}
+
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
 
 async function loadDecisions() {
   try {
@@ -478,6 +670,10 @@ function showMessage(message, type) {
 }
 
 function getOwner(decision) {
+  if (decision.id > seedDecisions.length && state.currentUser) {
+    return state.currentUser.name;
+  }
+
   const owners = ["Julia Smith", "Michael Kim", "Aisha Carter", "David Huang", "Sarah Reed"];
   return owners[(decision.id - 1) % owners.length];
 }
@@ -553,6 +749,19 @@ document.querySelectorAll("[data-view]").forEach((button) => {
   button.addEventListener("click", () => setView(button.dataset.view));
 });
 
+elements.authForm.addEventListener("submit", handleAuthSubmit);
+elements.authSwitchButton.addEventListener("click", () => {
+  showAuth(state.authMode === "login" ? "register" : "login");
+});
+elements.demoLoginButton.addEventListener("click", () => {
+  const demoUser = loadUsers().find((user) => user.email === "demo@decisiondesk.com");
+  setSession(demoUser);
+});
+elements.profileButton.addEventListener("click", () => {
+  setView("documents");
+  showMessage(`User: ${state.currentUser.name} (${state.currentUser.role})`, "success");
+});
+elements.logoutButton.addEventListener("click", logoutUser);
 elements.form.addEventListener("submit", saveDecision);
 elements.resetButton.addEventListener("click", () => {
   resetForm();
@@ -597,4 +806,4 @@ elements.rows.addEventListener("click", (event) => {
   }
 });
 
-loadDecisions();
+initializeAuth();
