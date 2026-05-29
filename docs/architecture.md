@@ -12,6 +12,8 @@ Përmban faqen vizuale të projektit:
 
 Kjo pjesë shfaq dashboard-in, tabelën e vendimeve, filtrimin, kërkimin dhe formën për shtim/përditësim.
 
+Në Vercel, kjo pjesë shërbehet si website statik nga folderi `wwwroot`.
+
 ### C# API
 
 `Program.cs` hap aplikacionin web dhe ofron endpoints:
@@ -21,6 +23,8 @@ Kjo pjesë shfaq dashboard-in, tabelën e vendimeve, filtrimin, kërkimin dhe fo
 - `POST /api/decisions`
 - `PUT /api/decisions/{id}`
 - `DELETE /api/decisions/{id}`
+
+Këto endpoints funksionojnë kur projekti hapet lokalisht me `dotnet run`.
 
 ### Models
 
@@ -51,6 +55,10 @@ dotnet run -- --console
 ## Flow
 
 HTML/CSS/JavaScript UI -> C# API -> DecisionService -> FileRepository -> CSV
+
+Në Vercel:
+
+HTML/CSS/JavaScript UI -> localStorage demo data
 
 ## Pse kjo arkitekturë?
 

@@ -103,6 +103,7 @@ Në rast se diçka nuk funksionon live:
 
 * Do të përdor `docs/demo-output.txt` si output të gatshëm të flow-it kryesor
 * Do të hap README për të treguar komandat dhe flow-in e demos
+* Në Vercel, website-i punon si static UI me të dhëna demo në browser
 * Do të përdor `dotnet run -- --demo-check` për të verifikuar shpejt që logjika CRUD funksionon
 * Do të shpjegoj flow-in përmes `docs/class-diagram.md` dhe arkitekturës UI -> Service -> Repository -> CSV
 * Repo në GitHub do të jetë i hapur si referencë

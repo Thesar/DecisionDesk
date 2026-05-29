@@ -63,6 +63,12 @@ Versioni console ende ekziston për backup:
 dotnet run -- --console
 ```
 
+## Deployment në Vercel
+
+Vercel shërben pjesën statike të website-it nga folderi `wwwroot`. Kjo është konfiguruar në `vercel.json`.
+
+Në Vercel, website-i përdor të dhëna demo në browser përmes `localStorage`, sepse C# API ekzekutohet lokalisht me `dotnet run`. Lokalisht, i njëjti UI lidhet me C# API dhe CSV.
+
 Për të kontrolluar shpejt nëse flow-i kryesor është gati për demo:
 
 ```bash

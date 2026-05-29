@@ -1,6 +1,17 @@
+const STORAGE_KEY = "decisiondesk-decisions";
+
+const seedDecisions = [
+  { id: 1, name: "Price Change", type: "price", value: 10, risk: 0.2 },
+  { id: 2, name: "Hiring", type: "hiring", value: 5000, risk: 0.3 },
+  { id: 3, name: "Marketing", type: "marketing", value: 2000, risk: 0.25 },
+  { id: 4, name: "Expansion", type: "investment", value: 10000, risk: 0.5 },
+  { id: 5, name: "Discount", type: "price", value: 5, risk: 0.15 },
+];
+
 const state = {
   decisions: [],
   editingId: null,
+  usesApi: true,
 };
 
 const elements = {
@@ -22,19 +33,53 @@ const elements = {
   highRisk: document.querySelector("#highRisk"),
   totalValue: document.querySelector("#totalValue"),
   activeFilter: document.querySelector("#activeFilter"),
+  statusPill: document.querySelector("#statusPill"),
 };
 
 async function loadDecisions() {
-  const response = await fetch("/api/decisions");
+  try {
+    const response = await fetch("/api/decisions", { headers: { Accept: "application/json" } });
+    const contentType = response.headers.get("content-type") || "";
 
-  if (!response.ok) {
-    showMessage("Nuk u lexuan vendimet.", "error");
-    return;
+    if (!response.ok || !contentType.includes("application/json")) {
+      throw new Error("API unavailable");
+    }
+
+    state.decisions = await response.json();
+    state.usesApi = true;
+  } catch {
+    state.decisions = loadLocalDecisions();
+    state.usesApi = false;
   }
 
-  state.decisions = await response.json();
+  updateModeLabel();
   syncTypeFilter();
   render();
+}
+
+function loadLocalDecisions() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+
+  if (!saved) {
+    saveLocalDecisions(seedDecisions);
+    return [...seedDecisions];
+  }
+
+  try {
+    const parsed = JSON.parse(saved);
+    return Array.isArray(parsed) ? parsed : [...seedDecisions];
+  } catch {
+    saveLocalDecisions(seedDecisions);
+    return [...seedDecisions];
+  }
+}
+
+function saveLocalDecisions(decisions) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(decisions));
+}
+
+function updateModeLabel() {
+  elements.statusPill.textContent = state.usesApi ? "Demo Ready" : "Vercel Demo";
 }
 
 function syncTypeFilter() {
@@ -120,6 +165,29 @@ async function saveDecision(event) {
     risk: Number(elements.riskInput.value),
   };
 
+  const validationMessage = validateDecision(payload);
+
+  if (validationMessage) {
+    showMessage(validationMessage, "error");
+    return;
+  }
+
+  if (state.usesApi) {
+    const saved = await saveDecisionWithApi(payload);
+
+    if (!saved) {
+      return;
+    }
+  } else {
+    saveDecisionLocally(payload);
+  }
+
+  showMessage(state.editingId ? "Vendimi u përditësua." : "Vendimi u shtua.", "success");
+  resetForm();
+  await loadDecisions();
+}
+
+async function saveDecisionWithApi(payload) {
   const url = state.editingId ? `/api/decisions/${state.editingId}` : "/api/decisions";
   const method = state.editingId ? "PUT" : "POST";
 
@@ -132,12 +200,49 @@ async function saveDecision(event) {
   if (!response.ok) {
     const error = await response.json().catch(() => ({ message: "Ruajtja dështoi." }));
     showMessage(error.message, "error");
-    return;
+    return false;
   }
 
-  showMessage(state.editingId ? "Vendimi u përditësua." : "Vendimi u shtua.", "success");
-  resetForm();
-  await loadDecisions();
+  return true;
+}
+
+function saveDecisionLocally(payload) {
+  if (state.editingId) {
+    state.decisions = state.decisions.map((decision) =>
+      decision.id === state.editingId
+        ? { ...decision, name: payload.name, value: payload.value }
+        : decision
+    );
+  } else {
+    const nextId = state.decisions.length ? Math.max(...state.decisions.map((decision) => decision.id)) + 1 : 1;
+    state.decisions = [...state.decisions, { ...payload, id: nextId }];
+  }
+
+  saveLocalDecisions(state.decisions);
+}
+
+function validateDecision(decision) {
+  if (!decision.name) {
+    return "Emri nuk mund të jetë bosh.";
+  }
+
+  if (!decision.type) {
+    return "Tipi nuk mund të jetë bosh.";
+  }
+
+  if (decision.name.includes(",") || decision.type.includes(",")) {
+    return "Emri dhe tipi nuk duhet të përmbajnë presje.";
+  }
+
+  if (decision.value <= 0) {
+    return "Vlera duhet të jetë më e madhe se 0.";
+  }
+
+  if (decision.risk < 0) {
+    return "Risku nuk mund të jetë negativ.";
+  }
+
+  return "";
 }
 
 function editDecision(id) {
@@ -172,11 +277,16 @@ async function deleteDecision(id) {
     return;
   }
 
-  const response = await fetch(`/api/decisions/${id}`, { method: "DELETE" });
+  if (state.usesApi) {
+    const response = await fetch(`/api/decisions/${id}`, { method: "DELETE" });
 
-  if (!response.ok) {
-    showMessage("Fshirja dështoi.", "error");
-    return;
+    if (!response.ok) {
+      showMessage("Fshirja dështoi.", "error");
+      return;
+    }
+  } else {
+    state.decisions = state.decisions.filter((item) => item.id !== id);
+    saveLocalDecisions(state.decisions);
   }
 
   showMessage("Vendimi u fshi.", "success");
