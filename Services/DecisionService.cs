@@ -40,6 +40,12 @@ public class DecisionService
             return false;
         }
 
+        if (ContainsCsvSeparator(name) || ContainsCsvSeparator(type))
+        {
+            message = "Emri dhe tipi nuk duhet të përmbajnë presje.";
+            return false;
+        }
+
         if (value <= 0)
         {
             message = "Vlera duhet të jetë më e madhe se 0.";
@@ -83,6 +89,12 @@ public class DecisionService
             return false;
         }
 
+        if (ContainsCsvSeparator(name))
+        {
+            message = "Emri nuk duhet të përmbajë presje.";
+            return false;
+        }
+
         if (value <= 0)
         {
             message = "Vlera duhet të jetë më e madhe se 0.";
@@ -115,5 +127,10 @@ public class DecisionService
         bool result = repo.Delete(id);
         message = result ? "Vendimi u fshi me sukses." : "Fshirja dështoi.";
         return result;
+    }
+
+    private static bool ContainsCsvSeparator(string value)
+    {
+        return value.Contains(',');
     }
 }

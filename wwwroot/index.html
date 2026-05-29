@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="sq">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>DecisionDesk</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <a class="brand" href="/" aria-label="DecisionDesk home">
+          <span class="brand-mark">✓</span>
+          <span>DecisionDesk</span>
+        </a>
+
+        <nav class="nav-list" aria-label="Main navigation">
+          <button class="nav-item active" type="button"><span class="nav-icon">▦</span> Decisions</button>
+          <button class="nav-item" type="button"><span class="nav-icon">◇</span> Risks</button>
+          <button class="nav-item" type="button"><span class="nav-icon">◷</span> History</button>
+          <button class="nav-item" type="button"><span class="nav-icon">◎</span> Reports</button>
+        </nav>
+
+        <div class="sidebar-note">
+          <span class="note-label">Demo flow</span>
+          <strong>Add → List → Update → Delete</strong>
+          <p>Flow-i kryesor është gati për prezantim live.</p>
+        </div>
+      </aside>
+
+      <main class="content">
+        <header class="topbar">
+          <div>
+            <h1>Decisions</h1>
+            <p>Menaxho vendimet e biznesit me validim, ruajtje CSV dhe CRUD live.</p>
+          </div>
+          <div class="status-pill">Demo Ready</div>
+        </header>
+
+        <section class="metrics" aria-label="Decision statistics">
+          <article class="metric-card">
+            <span>Total Decisions</span>
+            <strong id="totalDecisions">0</strong>
+            <small>Vendime të ruajtura</small>
+          </article>
+          <article class="metric-card">
+            <span>High Risk</span>
+            <strong id="highRisk">0</strong>
+            <small>Risk mbi 0.30</small>
+          </article>
+          <article class="metric-card">
+            <span>Total Value</span>
+            <strong id="totalValue">0</strong>
+            <small>Vlera totale</small>
+          </article>
+          <article class="metric-card">
+            <span>Active Filter</span>
+            <strong id="activeFilter">All</strong>
+            <small>Tipi aktual</small>
+          </article>
+        </section>
+
+        <section class="workspace">
+          <div class="decision-panel">
+            <div class="panel-toolbar">
+              <label class="field compact">
+                <span>Type</span>
+                <select id="typeFilter">
+                  <option value="">All Types</option>
+                </select>
+              </label>
+
+              <label class="field search-field">
+                <span>Search</span>
+                <input id="searchInput" type="search" placeholder="Search decisions...">
+              </label>
+
+              <button class="ghost-button" id="refreshButton" type="button">Refresh</button>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Decision</th>
+                    <th>Type</th>
+                    <th>Value</th>
+                    <th>Risk</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="decisionRows"></tbody>
+              </table>
+            </div>
+
+            <div class="empty-state" id="emptyState" hidden>
+              Nuk u gjet asnjë vendim për këtë kërkim.
+            </div>
+          </div>
+
+          <aside class="form-panel">
+            <div class="form-heading">
+              <h2 id="formTitle">Add Decision</h2>
+              <button class="text-button" id="resetButton" type="button">Clear</button>
+            </div>
+
+            <form id="decisionForm">
+              <input id="decisionId" type="hidden">
+
+              <label class="field">
+                <span>Name</span>
+                <input id="nameInput" name="name" type="text" placeholder="Decision title" required>
+              </label>
+
+              <label class="field">
+                <span>Type</span>
+                <input id="typeInput" name="type" type="text" placeholder="price, hiring, marketing" required>
+              </label>
+
+              <div class="form-grid">
+                <label class="field">
+                  <span>Value</span>
+                  <input id="valueInput" name="value" type="number" min="0.01" step="0.01" required>
+                </label>
+
+                <label class="field">
+                  <span>Risk</span>
+                  <input id="riskInput" name="risk" type="number" min="0" step="0.01" required>
+                </label>
+              </div>
+
+              <p class="helper-text">Risk mbi 0.30 shfaqet si High Risk në tabelë.</p>
+
+              <button class="primary-button" type="submit">Save Decision</button>
+              <p class="form-message" id="formMessage" role="status"></p>
+            </form>
+          </aside>
+        </section>
+      </main>
+    </div>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

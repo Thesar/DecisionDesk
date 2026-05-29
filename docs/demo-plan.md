@@ -62,7 +62,7 @@ Programi nuk crashon më dhe është më i qëndrueshëm.
 
 ## 6. Çka mbetet ende e dobët
 
-* UI është ende bazik (console application)
+* UI web është funksional, por ende mund të zgjerohet me grafikë dhe role të përdoruesve
 * Nuk ka unit tests të plota
 * Ruajtja në CSV nuk është ideale për projekte më të mëdha
 
@@ -77,13 +77,14 @@ Programi nuk crashon më dhe është më i qëndrueshëm.
 
 **Demo live (2–3 min)**
 
+* Hap website-in
 * Shtoj një vendim
-* E listoj
+* E filtroj ose kërkoj
 * E përditësoj ose e fshij
 
 **Shpjegimi teknik (1–2 min)**
 
-* Arkitektura: UI → Service → Repository
+* Arkitektura: HTML/CSS/JS UI → C# API → Service → Repository
 * Ruajtja në CSV
 
 **Problemi + zgjidhja (1 min)**
@@ -100,6 +101,16 @@ Programi nuk crashon më dhe është më i qëndrueshëm.
 
 Në rast se diçka nuk funksionon live:
 
-* Do të përdor screenshot të output-it
-* Do të shpjegoj flow-in në mënyrë teorike
+* Do të përdor `docs/demo-output.txt` si output të gatshëm të flow-it kryesor
+* Do të hap README për të treguar komandat dhe flow-in e demos
+* Do të përdor `dotnet run -- --demo-check` për të verifikuar shpejt që logjika CRUD funksionon
+* Do të shpjegoj flow-in përmes `docs/class-diagram.md` dhe arkitekturës UI -> Service -> Repository -> CSV
 * Repo në GitHub do të jetë i hapur si referencë
+
+## Checklist para prezantimit
+
+* `git status` nuk duhet të ketë ndryshime të papërfunduara
+* `dotnet build` duhet të përfundojë pa error
+* `dotnet run -- --demo-check` duhet të shfaqë vetëm rezultate `PASS`
+* `dotnet run` duhet të hapë website-in
+* Duhet të dihet rendi i saktë i demos: Add -> List/Search -> Update -> Delete

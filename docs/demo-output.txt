@@ -1,0 +1,30 @@
+DecisionDesk demo output backup
+
+Command:
+dotnet run -- --demo-check
+
+Expected output:
+
+File nuk u gjet, po krijoj file të ri...
+PASS - Initial data loaded
+PASS - Validation rejects empty name
+PASS - Add decision
+PASS - Filter by type
+PASS - Update decision
+PASS - Delete decision
+
+Demo readiness check completed.
+
+Live demo flow:
+
+1. Run the project with `dotnet run`
+2. Choose `2. Add Decision`
+3. Enter:
+   Name: Demo Decision
+   Type: price
+   Value: 1200
+   Risk: 0.4
+4. Choose `1. List Decisions`
+5. Choose `4. Update Decision`
+6. Choose `5. Delete Decision`
+7. Choose `0. Exit`

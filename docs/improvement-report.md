@@ -50,6 +50,6 @@
 ## Çka mbetet ende e dobët në projekt
 
 - Nuk ka ende unit tests.
-- UI mbetet bazik sepse është console application.
+- UI web është funksional për demo, por mund të zgjerohet me grafikë dhe role të përdoruesve.
 - Ruajtja në CSV është e thjeshtë dhe nuk është zgjidhje ideale për projekte më të mëdha.
 - Ka ende hapësirë për përmirësim në dokumentim dhe setup instructions.

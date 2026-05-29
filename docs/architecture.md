@@ -1,44 +1,74 @@
-# 🏗 DecisionDesk Architecture
+# DecisionDesk Architecture
 
 ## Layers
 
+### Web UI
+
+Përmban faqen vizuale të projektit:
+
+- `wwwroot/index.html`
+- `wwwroot/styles.css`
+- `wwwroot/app.js`
+
+Kjo pjesë shfaq dashboard-in, tabelën e vendimeve, filtrimin, kërkimin dhe formën për shtim/përditësim.
+
+### C# API
+
+`Program.cs` hap aplikacionin web dhe ofron endpoints:
+
+- `GET /api/decisions`
+- `GET /api/decisions/{id}`
+- `POST /api/decisions`
+- `PUT /api/decisions/{id}`
+- `DELETE /api/decisions/{id}`
+
 ### Models
-Përmbajnë strukturat e të dhënave (Decision).
+
+Përmbajnë strukturat e të dhënave, si `Decision`.
 
 ### Services
-Përmbajnë logjikën e biznesit dhe simulimet.
+
+Përmbajnë logjikën kryesore të biznesit:
+
+- validim i inputit
+- shtim i vendimeve
+- përditësim
+- fshirje
+- filtrim
 
 ### Data
-Menaxhojnë ruajtjen dhe leximin e të dhënave (Repository Pattern).
 
-### UI
-Ndërfaqja e përdoruesit (Console UI).
+Menaxhon ruajtjen dhe leximin e të dhënave përmes `FileRepository` dhe `Data/data.csv`.
 
----
+### Console UI
+
+`ConsoleUI` mbetet si backup dhe mund të hapet me:
+
+```bash
+dotnet run -- --console
+```
+
+## Flow
+
+HTML/CSS/JavaScript UI -> C# API -> DecisionService -> FileRepository -> CSV
 
 ## Pse kjo arkitekturë?
 
-- Ndarje e përgjegjësive
-- Lehtësi për mirëmbajtje
-- Kod më i organizuar
-- Zgjerim i lehtë në të ardhmen
-
----
+- Ndarje e qartë e përgjegjësive
+- Website për demo vizuale
+- C# API për lidhjen mes UI dhe logjikës
+- Repository Pattern për ruajtjen e të dhënave
+- Console UI si plan B
 
 ## Repository Pattern
 
-Përdoret për të ndarë logjikën e aksesit në të dhëna nga logjika e biznesit.
+Repository Pattern përdoret për të ndarë logjikën e aksesit në të dhëna nga logjika e biznesit. `DecisionService` nuk e di si ruhen të dhënat; ai përdor vetëm `IRepository<Decision>`.
 
----
+## Single Responsibility Principle
 
-## SOLID Principle
-
-### Single Responsibility Principle (SRP)
-
-Çdo klasë ka një rol të vetëm:
-- Decision → data
-- SimulationService → logjikë
-- FileRepository → ruajtje
-- ConsoleUI → ndërfaqe
-
-Kjo e bën sistemin më të pastër dhe të lehtë për mirëmbajtje.
+- `Decision` -> përfaqëson të dhënat
+- `DecisionService` -> menaxhon logjikën dhe validimin
+- `FileRepository` -> lexon dhe ruan CSV
+- `wwwroot` -> shfaq ndërfaqen web
+- `ConsoleUI` -> shërben si backup console
+- `DemoReadinessCheck` -> verifikon flow-in kryesor për demo

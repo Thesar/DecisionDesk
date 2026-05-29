@@ -1,69 +1,50 @@
-# Sprint 2 Plan — Thesar Habibaj  
-Data: 1 Prill 2026  
+# Sprint Plan - Demo Preparation
 
-## Gjendja Aktuale  
+Data: 29 May 2026
 
-- Funksionon:  
-  - Listimi i vendimeve (Read)  
-  - Shtimi i vendimeve (Create)  
-  - Kërkimi sipas ID  
-  - Përditësimi i vendimeve (Update)  
-  - Fshirja e vendimeve (Delete)  
-  - Ruajtja dhe leximi nga CSV  
-  - Arkitektura me shtresa (UI → Service → Repository)  
+## Gjendja aktuale
 
-- Nuk funksionon / probleme:  
-  - Nuk ka filtrim sipas emrit ose tipit  
-  - Nuk ka validim të plotë për input gabim në UI  
-  - Nuk ka trajtim të gabimeve (mund të crashojë në disa raste)  
+Funksionon:
 
-- Programi kompajlohet dhe ekzekutohet: Po  
+- Listimi i vendimeve
+- Shtimi i vendimeve
+- Kërkimi sipas ID
+- Përditësimi i vendimeve
+- Fshirja e vendimeve
+- Filtrimi sipas tipit
+- Ruajtja dhe leximi nga CSV
+- Validimi i inputit numerik
+- Trajtimi i ID që nuk ekziston
+- Demo readiness check me `dotnet run -- --demo-check`
 
----
+Programi kompajlohet dhe ekzekutohet: Po.
 
-## Plani i Sprintit  
+## Flow-i kryesor për demo
 
-### Feature e Re  
-Do të implementoj kërkim/filtrim të vendimeve sipas emrit.  
+Add Decision -> Validate -> Save -> List -> Update/Delete
 
-- Useri shkruan një emër (p.sh. "Marketing")  
-- Programi shfaq vetëm vendimet që përmbajnë atë emër  
-- Feature kalon nëpër:  
-  - UI → merr input  
-  - Service → filtron listën  
-  - Repository → jep të dhënat  
+Ky flow është zgjedhur sepse demonstron të gjithë zinxhirin teknik:
 
----
+- UI merr input nga përdoruesi
+- Service bën validimin dhe logjikën
+- Repository ruan të dhënat
+- CSV mban historikun e vendimeve
 
-### Error Handling  
+## Rreziqet para demos
 
-Do të trajtoj këto raste:  
+- Nëse ambienti nuk ka .NET SDK 9.0 ose më të ri, projekti nuk hapet.
+- Nëse `Data/data.csv` ndryshohet gabimisht, të dhënat live mund të duken ndryshe.
+- Console UI është bazik, prandaj prezantimi duhet të fokusohet në flow dhe arkitekturë.
 
-1. Input jo valid (p.sh. tekst në vend të numrit)  
-   - Mesazh: "Ju lutem shkruani numër valid"  
+## Plan B
 
-2. ID që nuk ekziston  
-   - Mesazh: "Itemi nuk u gjet"  
+- Përdor `docs/demo-output.txt` si output backup.
+- Përdor `dotnet run -- --demo-check` për të provuar logjikën pa prekur të dhënat kryesore.
+- Përdor README dhe `docs/class-diagram.md` për të shpjeguar sistemin nëse demo live dështon.
 
-3. File mungon ose nuk lexohet  
-   - Mesazh: "File nuk u gjet, po krijoj file të ri..."  
+## Checklist
 
----
-
-### Teste  
-
-Do të testoj:  
-
-- Metodën e kërkimit (Search)  
-- Metodën Add (validim i inputit)  
-
-Raste kufitare:  
-- Kërkim për item që ekziston  
-- Kërkim për item që nuk ekziston  
-- Shtim me emër bosh (duhet të dështojë)  
-
----
-
-## Afati  
-
-- Deadline: Martë, 8 Prill 2026, ora 08:30
+- `dotnet build`
+- `dotnet run -- --demo-check`
+- `dotnet run`
+- Add -> List -> Update -> Delete -> Exit
