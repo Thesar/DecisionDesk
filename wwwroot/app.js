@@ -215,6 +215,8 @@ function showAuth(mode) {
 function showApp() {
   elements.authScreen.classList.add("hidden");
   document.body.classList.remove("auth-active");
+  state.activeView = "dashboard";
+  syncSearch("");
   updateUserProfile();
   loadDecisions();
 }
@@ -381,7 +383,7 @@ function syncTypeFilter() {
 function setView(viewName) {
   state.activeView = viewName;
   elements.typeFilter.value = "";
-  syncSearch(elements.searchInput.value);
+  syncSearch("");
 
   document.querySelectorAll("[data-view]").forEach((button) => {
     button.classList.toggle("active", button.dataset.view === viewName && button.classList.contains("nav-item"));
@@ -555,6 +557,14 @@ function validateDecision(decision) {
     return "Vlera duhet të jetë më e madhe se 0.";
   }
 
+  if (Number.isNaN(decision.value)) {
+    return "Vlera duhet të jetë numër valid.";
+  }
+
+  if (Number.isNaN(decision.risk)) {
+    return "Risku duhet të jetë numër valid.";
+  }
+
   if (decision.risk < 0) {
     return "Risku nuk mund të jetë negativ.";
   }
@@ -642,14 +652,17 @@ function exportVisibleDecisions() {
   const csv = [header, ...lines]
     .map((line) => line.map((value) => `"${String(value).replaceAll('"', '""')}"`).join(","))
     .join("\n");
-  const blob = new Blob([csv], { type: "text/csv" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = "decisiondesk-export.csv";
-  link.click();
-  URL.revokeObjectURL(url);
-  showMessage("Raporti u eksportua.", "success");
+
+  localStorage.setItem("decisiondesk-last-export", csv);
+
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(csv).catch(() => {});
+  }
+
+  elements.insightLabel.textContent = "Export";
+  elements.insightTitle.textContent = "CSV report prepared.";
+  elements.insightText.textContent = `${rows.length} row(s) were exported and saved in this browser.`;
+  showMessage("Raporti u përgatit për export.", "success");
 }
 
 function resetDemoData() {
