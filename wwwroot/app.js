@@ -8,10 +8,82 @@ const seedDecisions = [
   { id: 5, name: "Discount", type: "price", value: 5, risk: 0.15 },
 ];
 
+const viewConfig = {
+  dashboard: {
+    title: "Dashboard",
+    subtitle: "Përmbledhje e vendimeve, riskut dhe vlerës totale.",
+    label: "Dashboard",
+    insight: "All decisions are visible.",
+    text: "Use the dashboard to start the demo, then move into Decisions for CRUD.",
+  },
+  decisions: {
+    title: "Decisions",
+    subtitle: "Menaxho vendimet e biznesit me validim, ruajtje CSV dhe CRUD live.",
+    label: "Decisions",
+    insight: "CRUD flow is ready.",
+    text: "Add, list, edit and delete decisions from this screen.",
+  },
+  projects: {
+    title: "Projects",
+    subtitle: "Vendimet e investimeve dhe projekteve strategjike.",
+    label: "Projects",
+    insight: "Project-related decisions are filtered.",
+    text: "This view focuses on investment and strategic decisions.",
+    types: ["investment", "strategic"],
+  },
+  initiatives: {
+    title: "Initiatives",
+    subtitle: "Marketing, hiring dhe nisma operacionale.",
+    label: "Initiatives",
+    insight: "Initiatives are filtered by type.",
+    text: "Useful for showing how the same data can be organized by business area.",
+    types: ["marketing", "hiring", "operational"],
+  },
+  risks: {
+    title: "Risks",
+    subtitle: "Vendime me risk më të lartë se 0.30.",
+    label: "Risk Review",
+    insight: "High risk decisions need attention.",
+    text: "This button now filters the table to show only high risk items.",
+    filter: (decision) => decision.risk > 0.3,
+  },
+  actions: {
+    title: "Actions",
+    subtitle: "Vendime që kanë nevojë për follow-up.",
+    label: "Action Queue",
+    insight: "Pending and review items are highlighted.",
+    text: "This view shows decisions that are not fully approved yet.",
+    filter: (decision) => decision.risk >= 0.25,
+  },
+  reports: {
+    title: "Reports",
+    subtitle: "Raport i shpejtë për vlerën, riskun dhe tipet kryesore.",
+    label: "Report Summary",
+    insight: "Report view summarizes the current portfolio.",
+    text: "Use the Export button to generate a browser download of the visible table.",
+  },
+  analytics: {
+    title: "Analytics",
+    subtitle: "Vendimet e renditura sipas vlerës.",
+    label: "Analytics",
+    insight: "Highest value decisions appear first.",
+    text: "This view sorts the visible decisions by value for quick comparison.",
+    sort: (a, b) => b.value - a.value,
+  },
+  documents: {
+    title: "Documents",
+    subtitle: "Dokumentim dhe materiale për demo.",
+    label: "Documents",
+    insight: "README, demo plan and output backup are ready.",
+    text: "For Vercel demo, the UI works with local browser data; locally it connects to C# API and CSV.",
+  },
+};
+
 const state = {
   decisions: [],
   editingId: null,
   usesApi: true,
+  activeView: "dashboard",
 };
 
 const elements = {
@@ -19,21 +91,35 @@ const elements = {
   emptyState: document.querySelector("#emptyState"),
   typeFilter: document.querySelector("#typeFilter"),
   searchInput: document.querySelector("#searchInput"),
-  refreshButton: document.querySelector("#refreshButton"),
+  topSearchInput: document.querySelector("#topSearchInput"),
+  filterButton: document.querySelector("#filterButton"),
+  exportButton: document.querySelector("#exportButton"),
   form: document.querySelector("#decisionForm"),
   formTitle: document.querySelector("#formTitle"),
   formMessage: document.querySelector("#formMessage"),
   decisionId: document.querySelector("#decisionId"),
   nameInput: document.querySelector("#nameInput"),
   typeInput: document.querySelector("#typeInput"),
+  descriptionInput: document.querySelector("#descriptionInput"),
   valueInput: document.querySelector("#valueInput"),
   riskInput: document.querySelector("#riskInput"),
+  ownerInput: document.querySelector("#ownerInput"),
   resetButton: document.querySelector("#resetButton"),
+  cancelButton: document.querySelector("#cancelButton"),
+  resetDataButton: document.querySelector("#resetDataButton"),
   totalDecisions: document.querySelector("#totalDecisions"),
+  pendingDecisions: document.querySelector("#pendingDecisions"),
   highRisk: document.querySelector("#highRisk"),
   totalValue: document.querySelector("#totalValue"),
   activeFilter: document.querySelector("#activeFilter"),
   statusPill: document.querySelector("#statusPill"),
+  pageTitle: document.querySelector("#pageTitle"),
+  pageSubtitle: document.querySelector("#pageSubtitle"),
+  insightLabel: document.querySelector("#insightLabel"),
+  insightTitle: document.querySelector("#insightTitle"),
+  insightText: document.querySelector("#insightText"),
+  notificationButton: document.querySelector("#notificationButton"),
+  helpButton: document.querySelector("#helpButton"),
 };
 
 async function loadDecisions() {
@@ -100,36 +186,70 @@ function syncTypeFilter() {
   elements.typeFilter.value = types.includes(currentValue) ? currentValue : "";
 }
 
+function setView(viewName) {
+  state.activeView = viewName;
+  elements.typeFilter.value = "";
+  syncSearch(elements.searchInput.value);
+
+  document.querySelectorAll("[data-view]").forEach((button) => {
+    button.classList.toggle("active", button.dataset.view === viewName && button.classList.contains("nav-item"));
+  });
+
+  render();
+}
+
 function getVisibleDecisions() {
+  const config = viewConfig[state.activeView] || viewConfig.dashboard;
   const type = elements.typeFilter.value.toLowerCase();
   const search = elements.searchInput.value.trim().toLowerCase();
 
-  return state.decisions.filter((decision) => {
+  let decisions = state.decisions.filter((decision) => {
+    const matchesViewTypes = !config.types || config.types.includes(decision.type.toLowerCase());
+    const matchesViewFilter = !config.filter || config.filter(decision);
     const matchesType = !type || decision.type.toLowerCase() === type;
     const matchesSearch =
       !search ||
       decision.name.toLowerCase().includes(search) ||
       decision.type.toLowerCase().includes(search) ||
+      getOwner(decision).toLowerCase().includes(search) ||
       String(decision.id).includes(search);
 
-    return matchesType && matchesSearch;
+    return matchesViewTypes && matchesViewFilter && matchesType && matchesSearch;
   });
+
+  if (config.sort) {
+    decisions = [...decisions].sort(config.sort);
+  }
+
+  return decisions;
 }
 
 function render() {
   const visibleDecisions = getVisibleDecisions();
+  renderViewText(visibleDecisions);
   renderMetrics(visibleDecisions);
   renderRows(visibleDecisions);
+}
+
+function renderViewText(visibleDecisions) {
+  const config = viewConfig[state.activeView] || viewConfig.dashboard;
+  elements.pageTitle.textContent = config.title;
+  elements.pageSubtitle.textContent = config.subtitle;
+  elements.insightLabel.textContent = config.label;
+  elements.insightTitle.textContent = config.insight;
+  elements.insightText.textContent = `${config.text} Showing ${visibleDecisions.length} item(s).`;
 }
 
 function renderMetrics(visibleDecisions) {
   const totalValue = visibleDecisions.reduce((sum, decision) => sum + decision.value, 0);
   const highRisk = visibleDecisions.filter((decision) => decision.risk > 0.3).length;
+  const pending = visibleDecisions.filter((decision) => getStatus(decision).label !== "Approved").length;
 
   elements.totalDecisions.textContent = visibleDecisions.length;
+  elements.pendingDecisions.textContent = pending;
   elements.highRisk.textContent = highRisk;
   elements.totalValue.textContent = formatValue(totalValue);
-  elements.activeFilter.textContent = elements.typeFilter.value || "All";
+  elements.activeFilter.textContent = elements.typeFilter.value || viewConfig[state.activeView].label;
 }
 
 function renderRows(visibleDecisions) {
@@ -137,13 +257,18 @@ function renderRows(visibleDecisions) {
   elements.emptyState.hidden = visibleDecisions.length > 0;
 
   for (const decision of visibleDecisions) {
+    const status = getStatus(decision);
+    const owner = getOwner(decision);
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td class="id-cell">DEC-${String(decision.id).padStart(3, "0")}</td>
       <td>${escapeHtml(decision.name)}</td>
       <td><span class="type-chip">${escapeHtml(decision.type)}</span></td>
+      <td><span class="owner-cell"><span class="avatar">${initials(owner)}</span>${escapeHtml(owner)}</span></td>
       <td>${formatValue(decision.value)}</td>
-      <td><span class="risk-chip ${riskClass(decision.risk)}">${riskLabel(decision.risk)} (${decision.risk})</span></td>
+      <td><span class="risk-chip ${riskClass(decision.risk)}">${riskLabel(decision.risk)}</span></td>
+      <td><span class="status-chip ${status.className}">${status.label}</span></td>
+      <td>${getUpdatedDate(decision)}</td>
       <td>
         <div class="action-group">
           <button class="row-button edit" type="button" data-action="edit" data-id="${decision.id}">Edit</button>
@@ -259,6 +384,8 @@ function editDecision(id) {
   elements.typeInput.value = decision.type;
   elements.valueInput.value = decision.value;
   elements.riskInput.value = decision.risk;
+  elements.ownerInput.value = getOwner(decision);
+  elements.descriptionInput.value = `${decision.name} decision for ${decision.type} planning.`;
   elements.typeInput.disabled = true;
   elements.riskInput.disabled = true;
   elements.nameInput.focus();
@@ -297,14 +424,88 @@ async function deleteDecision(id) {
 function resetForm() {
   state.editingId = null;
   elements.form.reset();
+  elements.descriptionInput.value = "";
   elements.formTitle.textContent = "Add Decision";
   elements.typeInput.disabled = false;
   elements.riskInput.disabled = false;
 }
 
+function syncSearch(value) {
+  elements.searchInput.value = value;
+  elements.topSearchInput.value = value;
+}
+
+function exportVisibleDecisions() {
+  const rows = getVisibleDecisions();
+  const header = ["ID", "Name", "Type", "Owner", "Value", "Risk", "Status"];
+  const lines = rows.map((decision) => [
+    decision.id,
+    decision.name,
+    decision.type,
+    getOwner(decision),
+    decision.value,
+    decision.risk,
+    getStatus(decision).label,
+  ]);
+  const csv = [header, ...lines]
+    .map((line) => line.map((value) => `"${String(value).replaceAll('"', '""')}"`).join(","))
+    .join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "decisiondesk-export.csv";
+  link.click();
+  URL.revokeObjectURL(url);
+  showMessage("Raporti u eksportua.", "success");
+}
+
+function resetDemoData() {
+  saveLocalDecisions(seedDecisions);
+
+  if (!state.usesApi) {
+    state.decisions = [...seedDecisions];
+    syncTypeFilter();
+    render();
+  }
+
+  showMessage("Demo data u rikthye.", "success");
+}
+
 function showMessage(message, type) {
   elements.formMessage.textContent = message;
   elements.formMessage.className = `form-message ${type}`;
+}
+
+function getOwner(decision) {
+  const owners = ["Julia Smith", "Michael Kim", "Aisha Carter", "David Huang", "Sarah Reed"];
+  return owners[(decision.id - 1) % owners.length];
+}
+
+function getStatus(decision) {
+  if (decision.risk > 0.35) {
+    return { label: "Pending", className: "status-pending" };
+  }
+
+  if (decision.risk >= 0.25) {
+    return { label: "In Review", className: "status-review" };
+  }
+
+  return { label: "Approved", className: "status-approved" };
+}
+
+function getUpdatedDate(decision) {
+  const day = String(6 + decision.id).padStart(2, "0");
+  return `May ${day}, 2026`;
+}
+
+function initials(name) {
+  return name
+    .split(" ")
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 }
 
 function formatValue(value) {
@@ -317,14 +518,14 @@ function formatValue(value) {
 
 function riskLabel(risk) {
   if (risk > 0.3) {
-    return "High";
+    return `High (${risk})`;
   }
 
   if (risk >= 0.2) {
-    return "Medium";
+    return `Medium (${risk})`;
   }
 
-  return "Low";
+  return `Low (${risk})`;
 }
 
 function riskClass(risk) {
@@ -348,14 +549,36 @@ function escapeHtml(value) {
     .replaceAll("'", "&#039;");
 }
 
+document.querySelectorAll("[data-view]").forEach((button) => {
+  button.addEventListener("click", () => setView(button.dataset.view));
+});
+
 elements.form.addEventListener("submit", saveDecision);
 elements.resetButton.addEventListener("click", () => {
   resetForm();
   showMessage("", "");
 });
-elements.refreshButton.addEventListener("click", loadDecisions);
+elements.cancelButton.addEventListener("click", () => {
+  resetForm();
+  showMessage("Forma u anulua.", "success");
+});
+elements.filterButton.addEventListener("click", () => setView("risks"));
+elements.exportButton.addEventListener("click", exportVisibleDecisions);
+elements.resetDataButton.addEventListener("click", resetDemoData);
+elements.notificationButton.addEventListener("click", () => setView("risks"));
+elements.helpButton.addEventListener("click", () => {
+  setView("documents");
+  showMessage("Plan B: përdor README, demo-plan dhe export-in e tabelës.", "success");
+});
 elements.typeFilter.addEventListener("change", render);
-elements.searchInput.addEventListener("input", render);
+elements.searchInput.addEventListener("input", (event) => {
+  syncSearch(event.target.value);
+  render();
+});
+elements.topSearchInput.addEventListener("input", (event) => {
+  syncSearch(event.target.value);
+  render();
+});
 elements.rows.addEventListener("click", (event) => {
   const button = event.target.closest("button[data-action]");
 

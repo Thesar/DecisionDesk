@@ -15,11 +15,27 @@
         </a>
 
         <nav class="nav-list" aria-label="Main navigation">
-          <button class="nav-item active" type="button"><span class="nav-icon">▦</span> Decisions</button>
-          <button class="nav-item" type="button"><span class="nav-icon">◇</span> Risks</button>
-          <button class="nav-item" type="button"><span class="nav-icon">◷</span> History</button>
-          <button class="nav-item" type="button"><span class="nav-icon">◎</span> Reports</button>
+          <button class="nav-item active" type="button" data-view="dashboard"><span class="nav-icon">⌂</span> Dashboard</button>
+          <button class="nav-item" type="button" data-view="decisions"><span class="nav-icon">▦</span> Decisions</button>
+          <button class="nav-item" type="button" data-view="projects"><span class="nav-icon">□</span> Projects</button>
+          <button class="nav-item" type="button" data-view="initiatives"><span class="nav-icon">◇</span> Initiatives</button>
+          <button class="nav-item" type="button" data-view="risks"><span class="nav-icon">△</span> Risks</button>
+          <button class="nav-item" type="button" data-view="actions"><span class="nav-icon">✓</span> Actions</button>
+          <button class="nav-item" type="button" data-view="reports"><span class="nav-icon">▱</span> Reports</button>
+          <button class="nav-item" type="button" data-view="analytics"><span class="nav-icon">▥</span> Analytics</button>
+          <button class="nav-item" type="button" data-view="documents"><span class="nav-icon">▤</span> Documents</button>
         </nav>
+
+        <div class="views-block">
+          <div class="views-title">
+            <span>Views</span>
+            <button class="mini-action" id="resetDataButton" type="button" title="Reset demo data">+</button>
+          </div>
+          <button class="view-link" type="button" data-view="decisions">My Decisions</button>
+          <button class="view-link" type="button" data-view="risks">High Risk Decisions</button>
+          <button class="view-link" type="button" data-view="actions">Pending Actions</button>
+          <button class="view-link" type="button" data-view="dashboard">All Decisions</button>
+        </div>
 
         <div class="sidebar-note">
           <span class="note-label">Demo flow</span>
@@ -30,34 +46,51 @@
 
       <main class="content">
         <header class="topbar">
-          <div>
-            <h1>Decisions</h1>
-            <p>Menaxho vendimet e biznesit me validim, ruajtje CSV dhe CRUD live.</p>
+          <div class="page-title">
+            <h1 id="pageTitle">Decisions</h1>
+            <p id="pageSubtitle">Menaxho vendimet e biznesit me validim, ruajtje CSV dhe CRUD live.</p>
           </div>
-          <div class="status-pill" id="statusPill">Demo Ready</div>
+
+          <div class="top-actions">
+            <label class="top-search">
+              <span>Search</span>
+              <input id="topSearchInput" type="search" placeholder="Search decisions...">
+            </label>
+            <button class="icon-button" id="notificationButton" type="button" title="Show high risk decisions">!</button>
+            <button class="icon-button" id="helpButton" type="button" title="Show demo help">?</button>
+            <div class="status-pill" id="statusPill">Demo Ready</div>
+          </div>
         </header>
 
         <section class="metrics" aria-label="Decision statistics">
           <article class="metric-card">
             <span>Total Decisions</span>
             <strong id="totalDecisions">0</strong>
-            <small>Vendime të ruajtura</small>
+            <small id="totalTrend">Ready for review</small>
           </article>
           <article class="metric-card">
-            <span>High Risk</span>
+            <span>Pending Decisions</span>
+            <strong id="pendingDecisions">0</strong>
+            <small>Need follow-up</small>
+          </article>
+          <article class="metric-card">
+            <span>High Risk Decisions</span>
             <strong id="highRisk">0</strong>
             <small>Risk mbi 0.30</small>
           </article>
           <article class="metric-card">
             <span>Total Value</span>
             <strong id="totalValue">0</strong>
-            <small>Vlera totale</small>
+            <small id="activeFilter">All decisions</small>
           </article>
-          <article class="metric-card">
-            <span>Active Filter</span>
-            <strong id="activeFilter">All</strong>
-            <small>Tipi aktual</small>
-          </article>
+        </section>
+
+        <section class="insight-panel" id="insightPanel" aria-live="polite">
+          <div>
+            <span id="insightLabel">Dashboard</span>
+            <strong id="insightTitle">All decisions are visible.</strong>
+          </div>
+          <p id="insightText">Use the table filters, search, edit and delete actions to demonstrate the complete flow.</p>
         </section>
 
         <section class="workspace">
@@ -75,7 +108,8 @@
                 <input id="searchInput" type="search" placeholder="Search decisions...">
               </label>
 
-              <button class="ghost-button" id="refreshButton" type="button">Refresh</button>
+              <button class="ghost-button" id="filterButton" type="button">Filters</button>
+              <button class="ghost-button" id="exportButton" type="button">Export</button>
             </div>
 
             <div class="table-wrap">
@@ -85,8 +119,11 @@
                     <th>ID</th>
                     <th>Decision</th>
                     <th>Type</th>
+                    <th>Owner</th>
                     <th>Value</th>
                     <th>Risk</th>
+                    <th>Status</th>
+                    <th>Updated</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -109,13 +146,27 @@
               <input id="decisionId" type="hidden">
 
               <label class="field">
-                <span>Name</span>
-                <input id="nameInput" name="name" type="text" placeholder="Decision title" required>
+                <span>Type</span>
+                <select id="typeInput" name="type" required>
+                  <option value="">Select type</option>
+                  <option value="price">Price</option>
+                  <option value="hiring">Hiring</option>
+                  <option value="marketing">Marketing</option>
+                  <option value="investment">Investment</option>
+                  <option value="risk">Risk</option>
+                  <option value="strategic">Strategic</option>
+                  <option value="operational">Operational</option>
+                </select>
               </label>
 
               <label class="field">
-                <span>Type</span>
-                <input id="typeInput" name="type" type="text" placeholder="price, hiring, marketing" required>
+                <span>Decision Title</span>
+                <input id="nameInput" name="name" type="text" placeholder="Enter decision title" required>
+              </label>
+
+              <label class="field">
+                <span>Description</span>
+                <textarea id="descriptionInput" rows="4" placeholder="Describe the decision context..."></textarea>
               </label>
 
               <div class="form-grid">
@@ -130,9 +181,22 @@
                 </label>
               </div>
 
+              <label class="field">
+                <span>Owner</span>
+                <select id="ownerInput">
+                  <option>Julia Smith</option>
+                  <option>Michael Kim</option>
+                  <option>Aisha Carter</option>
+                  <option>David Huang</option>
+                </select>
+              </label>
+
               <p class="helper-text">Risk mbi 0.30 shfaqet si High Risk në tabelë.</p>
 
-              <button class="primary-button" type="submit">Save Decision</button>
+              <div class="form-actions">
+                <button class="ghost-button" id="cancelButton" type="button">Cancel</button>
+                <button class="primary-button" type="submit">Save</button>
+              </div>
               <p class="form-message" id="formMessage" role="status"></p>
             </form>
           </aside>
