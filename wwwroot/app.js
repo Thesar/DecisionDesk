@@ -62,7 +62,7 @@ const viewConfig = {
     subtitle: "Raport i shpejtë për vlerën, riskun dhe tipet kryesore.",
     label: "Report Summary",
     insight: "Report view summarizes the current portfolio.",
-    text: "Use the Export button to generate a browser download of the visible table.",
+    text: "Use the Export button to prepare a CSV copy of the visible table.",
   },
   analytics: {
     title: "Analytics",

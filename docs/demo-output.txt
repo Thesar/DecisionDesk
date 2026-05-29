@@ -15,16 +15,20 @@ PASS - Delete decision
 
 Demo readiness check completed.
 
-Live demo flow:
+Live website demo flow:
 
 1. Run the project with `dotnet run`
-2. Choose `2. Add Decision`
-3. Enter:
+2. Open the local URL shown in the terminal, usually `http://localhost:5000`
+3. Log in with:
+   Email: demo@decisiondesk.com
+   Password: demo123
+4. Add a decision:
    Name: Demo Decision
    Type: price
    Value: 1200
    Risk: 0.4
-4. Choose `1. List Decisions`
-5. Choose `4. Update Decision`
-6. Choose `5. Delete Decision`
-7. Choose `0. Exit`
+5. Search for "Demo Decision" and confirm it appears in the table
+6. Click `Edit`, change the value, and save
+7. Click `Delete` and confirm
+8. Click `Export` to prepare the visible table as CSV
+9. Click `Help` to show the plan B message

@@ -26,7 +26,7 @@ Ky sistem lejon përdoruesin të ruajë, analizojë dhe menaxhojë vendimet në 
 
 Flow-i kryesor që do të tregoj është:
 
-**Add Decision → Validate → Save → List → Update/Delete**
+**Register/Login → Dashboard → Add Decision → Validate → Save → List/Search → Update/Delete → Export**
 
 Pse e zgjodha këtë:
 Sepse ky flow demonstron të gjithë sistemin:
@@ -36,6 +36,7 @@ Sepse ky flow demonstron të gjithë sistemin:
 * ruajtje në CSV
 * leximi dhe shfaqja e të dhënave
 * modifikimi i tyre
+* plan B me export/README/demo-check
 
 Ky është flow-i më i plotë dhe më i rëndësishëm i aplikacionit.
 
@@ -62,7 +63,7 @@ Programi nuk crashon më dhe është më i qëndrueshëm.
 
 ## 6. Çka mbetet ende e dobët
 
-* UI web është funksional, por ende mund të zgjerohet me grafikë dhe role të përdoruesve
+* Login/Register është i mjaftueshëm për demo, por nuk është autentikim production me databazë dhe password hashing
 * Nuk ka unit tests të plota
 * Ruajtja në CSV nuk është ideale për projekte më të mëdha
 
@@ -78,9 +79,11 @@ Programi nuk crashon më dhe është më i qëndrueshëm.
 **Demo live (2–3 min)**
 
 * Hap website-in
+* Bëj login me demo account ose krijo account të ri
 * Shtoj një vendim
 * E filtroj ose kërkoj
 * E përditësoj ose e fshij
+* Tregoj Export/Help si plan B
 
 **Shpjegimi teknik (1–2 min)**
 

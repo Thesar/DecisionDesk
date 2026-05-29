@@ -20,11 +20,13 @@ Add Decision -> Validate -> Save -> List -> Update/Delete
 
 - Listimi i vendimeve
 - Shtimi i një vendimi të ri
-- Kërkimi sipas ID
+- Kërkimi sipas emrit, tipit, pronarit ose ID-së
 - Përditësimi i emrit dhe vlerës së vendimit
 - Fshirja e vendimit
 - Filtrimi sipas tipit
 - Dashboard web për vizualizimin e vendimeve
+- Register, login, demo login dhe logout për rrjedhë më reale prezantimi
+- Export i tabelës së dukshme si CSV i ruajtur në browser për plan B
 - API endpoints në C# për listim, shtim, përditësim dhe fshirje
 - Validim i inputeve numerike dhe tekstit
 - Ruajtje dhe lexim nga CSV
@@ -81,11 +83,13 @@ Flow-i që duhet të prezantohet live është:
 
 1. Hap aplikacionin me `dotnet run`
 2. Hap website-in në browser
-3. Shton një vendim të ri nga forma `Add Decision`
-4. E sheh vendimin në tabelë dhe te statistikat
-5. Përdor filter/search për ta gjetur
-6. Klikon `Edit` për ta përditësuar
-7. Klikon `Delete` për ta fshirë
+3. Hyn me `demo@decisiondesk.com` / `demo123` ose krijon account të ri
+4. Shton një vendim të ri nga forma `Add Decision`
+5. E sheh vendimin në tabelë dhe te statistikat
+6. Përdor filter/search për ta gjetur
+7. Klikon `Edit` për ta përditësuar
+8. Klikon `Delete` për ta fshirë
+9. Klikon `Export` ose `Help` për të treguar plan B
 
 Ky flow tregon input, validim, ruajtje në CSV, lexim, përditësim dhe fshirje.
 
@@ -119,9 +123,10 @@ DecisionDesk/
 
 ## Statusi
 
-Versioni aktual është i përgatitur për demo të flow-it kryesor CRUD në website. Role system dhe simulime më të avancuara mbeten ide për zgjerim, jo pjesë që do të prezantohen si funksionale live në këtë version.
+Versioni aktual është i përgatitur për demo të flow-it kryesor Register/Login -> Dashboard -> CRUD -> Export në website. Simulime më të avancuara dhe autentikim production mbeten ide për zgjerim, jo pjesë që do të prezantohen si funksionale live në këtë version.
 
 ## Dobësitë e njohura
 
 - Ruajtja në CSV është e mirë për demo dhe projekt bazik, por jo për sistem të madh.
 - Nuk ka unit tests me framework të jashtëm, por ka kontroll të brendshëm për demo me `--demo-check`.
+- Login/Register është demo auth me `localStorage`, jo autentikim production me databazë dhe password hashing.
